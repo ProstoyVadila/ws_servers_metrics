@@ -1,0 +1,77 @@
+services:
+
+  prom:
+    image: prom/prometheus
+    volumes:
+      - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"
+
+  # macos arm64 chip version
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor-arm64:v0.49.1
+    ports:
+      - "9091:9091"
+    volumes:
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
+    command:
+      - "-port=9091"
+
+  grafana:
+    build:
+      context: grafana/
+      dockerfile: Dockerfile
+    ports:
+      - "9092:9092"
+    environment:
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      DS_PROMETHEUS: prometheus
+    depends_on:
+      - prom
+
+  rust_ws_app:
+    build:
+      context: rust_ws_app/
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      RUST_LOG: info
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 2g
+
+  python_ws_app:
+    build:
+        context: python_ws_app/
+        dockerfile: Dockerfile
+    ports:
+        - "8001:8001"
+        - "8002:8002"
+    environment:
+      PORT: 8001
+      METRICS_PORT: 8002
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 2g
+
+  # k6:
+  #   image: grafana/k6
+  #   volumes:
+  #     - ./k6/scripts/python_script.js:/python_script.js
+  #   command: run /python_script.js
+  #   depends_on:
+  #     - prom 
+  #     - grafana
+  #     - cadvisor 
+  #     - python_ws_app 
+  #     - rust_ws_app 
