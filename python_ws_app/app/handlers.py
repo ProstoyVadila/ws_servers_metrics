@@ -97,10 +97,7 @@ class WsHandler(websocket.WebSocketHandler):
     @WS_BROADCAST_DURATION_SECONDS.time()
     async def broadcast_message(self, ws_msg: WsMessage) -> websocket.Awaitable[None] | None:
         for _con in self.application.users:
-            try:
-                _con.write_message(message=orjson.dumps(ws_msg.dict()))
-            except Exception:
-                logging.exception("Error handling message")
+            _con.write_message(message=orjson.dumps(ws_msg.dict()))
 
     async def send(self, ws_msg: WsMessage) -> websocket.Awaitable[None] | None:
         self.write_message(message=orjson.dumps(ws_msg.dict()))
