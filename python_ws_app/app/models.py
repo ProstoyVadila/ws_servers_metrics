@@ -3,6 +3,7 @@ from enum import StrEnum
 from pydantic import BaseModel
 
 class ActionType(StrEnum):
+    DIRECT = "direct"
     BROADCAST = "broadcast"
     PING = "ping"
     PONG = "pong"

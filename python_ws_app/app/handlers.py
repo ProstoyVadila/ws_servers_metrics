@@ -3,6 +3,7 @@ import logging
 from uuid import uuid4
 
 import orjson
+from datetime import datetime, UTC
 from tornado import websocket, web
 from pydantic import ValidationError
 
@@ -56,6 +57,9 @@ class WsHandler(websocket.WebSocketHandler):
             ws_msg.body = ws_msg.body or "successful"
 
             match ws_msg.action_type:
+                case ActionType.DIRECT:
+                    ws_msg.data = datetime.now(UTC).timestamp()
+                    await self.write_message(orjson.dumps(ws_msg.dict()))
                 case ActionType.BROADCAST:
                     ws_msg.data = str(sys.version)
                     await self.broadcast_message(ws_msg=ws_msg)
@@ -65,6 +69,9 @@ class WsHandler(websocket.WebSocketHandler):
                 case ActionType.PONG:
                     ws_msg.data = "ping"
                     await self.send(ws_msg=ws_msg)
+
+        except websocket.WebSocketClosedError:
+            logging.exception("Websocket connection was closed")
 
         except ValidationError:
             logging.exception("Cannot validate message")
@@ -96,9 +103,13 @@ class WsHandler(websocket.WebSocketHandler):
     async def send(self, ws_msg: WsMessage) -> websocket.Awaitable[None] | None:
         self.write_message(message=orjson.dumps(ws_msg.dict()))
 
-class Handler(web.RequestHandler):
+class RootHandler(web.RequestHandler):
     async def get(self) -> web.Awaitable[None] | None:
-        self.write(orjson.dumps({"status": "ok"}))
+        self.write("python_ws_app")
+
+class HealthcheckHandler(web.RequestHandler):
+    async def get(self) -> web.Awaitable[None] | None:
+        self.write("ok")
 
 
 class MetricHandler(web.RequestHandler):

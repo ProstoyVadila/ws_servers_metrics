@@ -1,7 +1,8 @@
-from handlers import WsHandler, Handler, MetricHandler
+from handlers import WsHandler, RootHandler, HealthcheckHandler, MetricHandler
 
 routes = [
-    (r"/", Handler),
+    (r"/", RootHandler),
+    (r"/healthcheck", HealthcheckHandler),
     (r"/ws", WsHandler),
     # (r"/metrics", MetricHandler)
 ]
