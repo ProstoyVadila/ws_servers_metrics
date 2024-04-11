@@ -13,8 +13,8 @@ use crate::metrics::{ALL_WS_CONNECTIONS_TOTAL, WS_CONNECTIONS, WS_MESSAGE_HANDLI
 static USER_ID_COUNTER: AtomicUsize = AtomicUsize::new(1);
 
 
-#[rocket::get("/")]
-pub fn chat<'r>(ws: WebSocket, state: &'r State<ChatRoom>) -> Channel<'r> {
+#[rocket::get("/ws")]
+pub fn get_chat<'r>(ws: WebSocket, state: &'r State<ChatRoom>) -> Channel<'r> {
     ws.channel(move |stream| Box::pin(async move {
         let user_id = USER_ID_COUNTER.fetch_add(1, Ordering::Relaxed);
         let (ws_sink, mut ws_stream) = stream.split();
@@ -31,8 +31,15 @@ pub fn chat<'r>(ws: WebSocket, state: &'r State<ChatRoom>) -> Channel<'r> {
                         state.handle_message(user_id, json_msg).await;
                         timer.stop_and_record();
                     },
-                    Message::Ping(_) => {},
-                    Message::Pong(_) => {},
+                    Message::Ping(_) => {
+                        log::debug!("get ping")
+                    },
+                    Message::Pong(_) => {
+                        log::debug!("get pong")
+                    },
+                    Message::Close(_) => {
+                        break;
+                    },
                     _ => {
                         // Unsupported
                         log::warn!("Unsupported message type {}", msg_content);
@@ -46,4 +53,14 @@ pub fn chat<'r>(ws: WebSocket, state: &'r State<ChatRoom>) -> Channel<'r> {
     
         Ok(())
     }))
+}
+
+#[rocket::get("/healthcheck")]
+pub fn get_healthcheck() -> &'static str {
+    "ok"
+}
+
+#[rocket::get("/")]
+pub fn get_root() -> &'static str {
+    "rust_ws_chat"
 }

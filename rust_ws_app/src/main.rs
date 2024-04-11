@@ -16,7 +16,7 @@ async fn main() {
     log::info!("Starting ws server on http://localhost:8082");
     let _ = rocket::build()
         .attach(prom.clone())
-        .mount("/ws", routes::get_routes())
+        .mount("/", routes::get_routes())
         .mount("/metrics", prom)
         .manage(chat::ChatRoom::default())
         .launch()

@@ -4,6 +4,8 @@ use serde_json::json;
 
 #[derive(PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum ActionType {
+    #[serde(alias="direct", alias="DIRECT")]
+    Direct,
     #[serde(alias="broadcast", alias="BROADCAST")]
     Broadcast,
     #[serde(alias="ping", alias="ping")]
@@ -22,7 +24,12 @@ pub struct WsMessage {
 }
 
 impl WsMessage {
-    pub fn new(user_id: usize, action_type: ActionType, body: String, data: Option<String>) -> WsMessage {
+    pub fn new(
+        user_id: usize, 
+        action_type: ActionType, 
+        body: String, 
+        data: Option<String>
+    ) -> WsMessage {
         WsMessage {
             user_id: Some(user_id), 
             action_type,

@@ -2,14 +2,13 @@
 use std::collections::HashMap;
 
 use rocket::{
-    futures::{stream::SplitSink, SinkExt}, 
-    tokio::sync::Mutex,
+    futures::{stream::SplitSink, SinkExt}, tokio::sync::Mutex,
 };
 use rocket_ws::{Message, stream::DuplexStream};
 use log;
 
 use crate::models::{WsMessage, ActionType};
-use crate::metrics::WS_BROADCAST_DURATION_SECONDS;
+// use crate::metrics::WS_BROADCAST_DURATION_SECONDS;
 
 
 pub struct ChatRoomConnection {
@@ -42,8 +41,7 @@ impl ChatRoom {
         let new_msg: WsMessage = match serde_json::from_str(msg.as_str()) {
             Ok(new_msg) => new_msg,
             Err(err) => {
-                log::warn!("Cannot deserialize json message");
-                log::debug!("{}", err);
+                log::error!("Cannot deserialize json message: {}", err);
                 return None;
             }
         };
@@ -53,9 +51,8 @@ impl ChatRoom {
     pub async fn handle_message(&self, user_id: usize, msg: String) {
         if let Some(msg) = self.parse_message(msg.clone()) {
             match msg.action_type {
-                ActionType::Broadcast => {
-                    self.handle_broadcast(user_id, msg).await;
-                },
+                ActionType::Direct => self.handle_direct(user_id, msg).await,
+                ActionType::Broadcast => self.handle_broadcast(user_id, msg).await,
                 ActionType::Ping => {
                     todo!()
                 },
@@ -64,6 +61,27 @@ impl ChatRoom {
                 }
             }
         }
+    }
+
+    pub async fn handle_direct(&self, user_id: usize, msg: WsMessage) {
+        // get timestamp for latency
+        let now = chrono::Utc::now();
+        let data = now.timestamp_nanos_opt().and_then(|now| Some(now.to_string()));
+        let msg = WsMessage::new(user_id, ActionType::Direct, msg.body, data);
+
+        self.send_direct_message(user_id, msg).await;
+    }
+
+    pub async fn send_direct_message(&self, user_id: usize, msg: WsMessage) {
+        let mut conns = self.connections.lock().await;
+        let conn = match conns.get_mut(&user_id) {
+            Some(conn) => conn,
+            None => {
+                log::error!("cannot find connection for user {}", user_id);
+                return;
+            }
+        };
+        let _ = conn.sink.send(Message::Text(msg.to_string())).await;
     }
 
     pub async fn handle_broadcast(&self, user_id: usize, msg: WsMessage) {
@@ -77,15 +95,16 @@ impl ChatRoom {
     }
 
     pub async fn broadcast_message(&self, msg: WsMessage) {
-        let timer = WS_BROADCAST_DURATION_SECONDS.start_timer();
+        // let timer = WS_BROADCAST_DURATION_SECONDS.start_timer();
         let mut conns = self.connections.lock().await;
         for (_id, conn) in conns.iter_mut() {
             let _ = conn.sink.send(Message::Text(msg.to_string())).await;
         }
-        timer.stop_and_record();
+        // timer.stop_and_record();
     }
 
     pub async fn flush(&self, user_id: usize) {
+        log::debug!("removing user {}", user_id);
         let mut conns = self.connections.lock().await;
         let _ = match conns.remove(&user_id) {
             Some(conn) => conn,
