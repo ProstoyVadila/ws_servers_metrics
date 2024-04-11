@@ -27,7 +27,7 @@ services:
       context: grafana/
       dockerfile: Dockerfile
     ports:
-      - "9092:9092"
+      - "3000:3000"
     environment:
       GF_PATHS_PROVISIONING: /etc/grafana/provisioning
       DS_PROMETHEUS: prometheus

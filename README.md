@@ -13,4 +13,4 @@ https://k6.io/docs/results-output/real-time/prometheus-remote-write/
 
 ## Dashboards
 
-grafana - http://localhost:9092
+grafana - http://localhost:3000
