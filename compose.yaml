@@ -45,7 +45,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 1
+          cpus: 2
           memory: 2g
 
   python_ws_app:
@@ -61,7 +61,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 1
+          cpus: 2
           memory: 2g
 
   # k6:
