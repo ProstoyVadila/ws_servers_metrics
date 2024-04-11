@@ -12,7 +12,7 @@ const SLEEP_TIME = 0.1;
 
 export const options = {
   scenarios: {
-    single_broadcast_msg_per_user: {
+    rampUp50: {
       executor: "ramping-vus",
       startVUs: 3,
       stages: [

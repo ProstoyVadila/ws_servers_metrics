@@ -18,6 +18,7 @@ Python app is based on Tornado.
 ## Dashboard
 
 grafana - http://localhost:3000
+dashboard - [here](http://localhost:3000/d/ee75b6b8-f1c6-4ef1-9d39-fe50cc55a274/websocket-server3a-rust-vs-python?orgId=1&refresh=5s)
 
 ## Quick Start
 
