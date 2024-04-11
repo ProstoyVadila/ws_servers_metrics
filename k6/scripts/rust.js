@@ -12,7 +12,7 @@ const SLEEP_TIME = 0.1;
 
 export const options = {
   scenarios: {
-    contacts: {
+    single_broadcast_msg_per_user: {
       executor: "ramping-vus",
       startVUs: 3,
       stages: [
@@ -22,7 +22,7 @@ export const options = {
         { target: 80, duration: "30s" },
         { target: 100, duration: "30s" },
         { target: 150, duration: "30s" },
-        { target: 200, duration: "30s" }, // it's gonna kill my mac
+        { target: 200, duration: "30s" }, // it's gonna kill my laptop
         // { target: 250, duration: "30s" },
         // { target: 300, duration: "30s" },
         // { target: 350, duration: "30s" },
@@ -42,7 +42,7 @@ export default function () {
 
   const res_rust_app = ws.connect(RUST_APP_URL, (socket) => {
     socket.on("open", function open() {
-      console.log(`VU ${__VU}: connected`);
+      console.debug(`VU ${__VU}: connected`);
       socket.send(JSON.stringify(data));
 
       for (let i = 0; i < 100; i++) {
@@ -51,15 +51,15 @@ export default function () {
       }
 
       socket.on("message", (msg) => {
-        // console.log(`VU ${__VU} recieved msg: ${msg}`);
+        console.debug(`VU ${__VU} recieved msg: ${msg}`);
       });
 
       socket.on("close", () => {
-        console.log(`VU ${__VU} disconnected`);
+        console.debug(`VU ${__VU} disconnected`);
       });
 
       socket.on("error", (err) => {
-        console.log(`VU ${__VU} got error: ${err}`);
+        console.debug(`VU ${__VU} got error: ${err}`);
       });
       socket.close();
     });
