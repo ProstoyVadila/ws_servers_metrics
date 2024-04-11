@@ -8,7 +8,11 @@ use rocket_ws::{Channel, Message, WebSocket};
 use log;
 
 use crate::chat::ChatRoom;
-use crate::metrics::{ALL_WS_CONNECTIONS_TOTAL, WS_CONNECTIONS, WS_MESSAGE_HANDLING_DURATION_SECONDS};
+use crate::metrics::{
+    ALL_WS_CONNECTIONS_TOTAL, 
+    WS_CONNECTIONS,
+    WS_MESSAGE_HANDLING_DURATION_SECONDS,
+};
 
 static USER_ID_COUNTER: AtomicUsize = AtomicUsize::new(1);
 
@@ -48,6 +52,7 @@ pub fn get_chat<'r>(ws: WebSocket, state: &'r State<ChatRoom>) -> Channel<'r> {
                 }
             }
         }
+
         state.flush(user_id).await;
         WS_CONNECTIONS.dec();
     

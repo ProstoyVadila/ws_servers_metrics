@@ -12,7 +12,8 @@ from metrics import (
     WS_CONNECTIONS,
     ALL_WS_CONNECTIONS_TOTAL,
     WS_BROADCAST_DURATION_SECONDS,
-    WS_MESSAGE_HANDLING_DURATION_SECONDS
+    WS_MESSAGE_HANDLING_DURATION_SECONDS,
+    WS_CONN_CLOSED_ERRORS_TOTAL
 )
 
 
@@ -71,6 +72,7 @@ class WsHandler(websocket.WebSocketHandler):
                     await self.send(ws_msg=ws_msg)
 
         except websocket.WebSocketClosedError:
+            WS_CONN_CLOSED_ERRORS_TOTAL.inc()
             logging.exception("Websocket connection was closed")
 
         except ValidationError:

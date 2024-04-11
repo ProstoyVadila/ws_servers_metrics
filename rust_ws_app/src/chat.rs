@@ -8,7 +8,10 @@ use rocket_ws::{Message, stream::DuplexStream};
 use log;
 
 use crate::models::{WsMessage, ActionType};
-// use crate::metrics::WS_BROADCAST_DURATION_SECONDS;
+use crate::metrics::{
+    WS_BROADCAST_DURATION_SECONDS,
+    WS_CONN_CLOSED_ERRORS_TOTAL,
+};
 
 
 pub struct ChatRoomConnection {
@@ -78,6 +81,7 @@ impl ChatRoom {
             Some(conn) => conn,
             None => {
                 log::error!("cannot find connection for user {}", user_id);
+                WS_CONN_CLOSED_ERRORS_TOTAL.inc();
                 return;
             }
         };
@@ -95,12 +99,12 @@ impl ChatRoom {
     }
 
     pub async fn broadcast_message(&self, msg: WsMessage) {
-        // let timer = WS_BROADCAST_DURATION_SECONDS.start_timer();
+        let timer = WS_BROADCAST_DURATION_SECONDS.start_timer();
         let mut conns = self.connections.lock().await;
         for (_id, conn) in conns.iter_mut() {
             let _ = conn.sink.send(Message::Text(msg.to_string())).await;
         }
-        // timer.stop_and_record();
+        timer.stop_and_record();
     }
 
     pub async fn flush(&self, user_id: usize) {
@@ -110,6 +114,7 @@ impl ChatRoom {
             Some(conn) => conn,
             _ => {
                 log::warn!("Cannot find a user {} to remove", user_id);
+                WS_CONN_CLOSED_ERRORS_TOTAL.inc();
                 return;
             }
         };
