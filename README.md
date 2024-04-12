@@ -5,6 +5,8 @@ Python app is based on Tornado.
 
 ## Metrics
 
+### Custom
+
 **WS_CONNECTIONS** - amount of ws connections at the moment
 
 **ALL_WS_CONNECTIONS_TOTAL** - amount of all new ws connections
@@ -14,6 +16,12 @@ Python app is based on Tornado.
 **WS_MESSAGE_HANDLING_DURATION_SECONDS** - duration of handling message in seconds
 
 **WS_CLOSED_CONNS_ERRORS_TOTAL** - amount of closed websocket connections
+
+### Default
+
+**k6 metrics** – [here](https://k6.io/docs/using-k6/metrics/reference/)
+
+**cadvisor metrics** - [here](https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md)
 
 ## Dashboard
 

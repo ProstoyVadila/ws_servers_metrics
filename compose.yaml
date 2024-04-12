@@ -6,6 +6,10 @@ services:
       - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
     ports:
       - "9090:9090"
+    command:
+      - --web.enable-remote-write-receiver
+      - --enable-feature=native-histograms
+      - --config.file=/etc/prometheus/prometheus.yml
 
   # macos arm64 chip version
   cadvisor:
@@ -82,7 +86,9 @@ services:
   #   image: grafana/k6
   #   volumes:
   #     - ./k6/scripts/both.js:/script.js
-  #   command: run -e RUST_APP_URL=http://rust_ws_app:8000 -e PYTHON_APP_URL=http://python_ws_app:8001 /script.js
+  #   environment:
+  #     K6_PROMETHEUS_RW_SERVER_URL: http://localhost:9090/api/v1/write
+  #   command: run -o experimental-prometheus-rw -e RUST_APP_URL=http://rust_ws_app:8000 -e PYTHON_APP_URL=http://python_ws_app:8001 /script.js
   #   depends_on:
   #     rust_ws_app:
   #       condition: service_healthy

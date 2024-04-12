@@ -32,10 +32,6 @@ scrape_configs:
     static_configs:
       - targets: ["cadvisor:9091"]
 
-  # - job_name: "node_exporter"
-  #   static_configs:
-  #     - targets: ["node-exporter:9100"]
-
   - job_name: "rust_ws_app"
     static_configs:
       - targets: ["rust_ws_app:8000"]
