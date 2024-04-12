@@ -1,7 +1,7 @@
 # WebSocket servers comparison
 
-Rust server is based on Rocket framework.
-Python app is based on Tornado.
+Rust ws server is based on Rocket framework. \
+Python ws server is based on Tornado.
 
 ## Metrics
 
@@ -51,12 +51,13 @@ docker compose up -d
 3. **run k6 load**
 
 ```
-k6 run k6/scripts/both.js
+K6_PROMETHEUS_RW_SERVER_URL=http://localhost:9090/api/v1/write \
+k6 run -o experimental-prometheus-rw k6/scripts/both.js
 ```
 
 ### Container Load
 
-1. **Uncomment k6 container in compose.yaml**
+1. **Uncomment k6 container manifest in compose.yaml**
 2. **raise all containers**
 
 ```
@@ -89,10 +90,15 @@ with console debug output
 k6 run -v ...
 ```
 
+### k6 metrics
+
+To push metrics from k6 to prometheus you need to specify
+**K6_PROMETHEUS_RW_SERVER_URL** env variable and add ` -o experimental-prometheus-rw` flag to `k6 run`. More [here](https://k6.io/docs/results-output/real-time/prometheus-remote-write/)
+
 ## Ideas for Improvement
 
-Feel free to add more scenarios or change an existing one.
+Feel free to add more scenarios and metrics.
 
-### Get additional metrics from k6 to Prometheus
+## Issues
 
-https://k6.io/docs/results-output/real-time/prometheus-remote-write/
+It seems CPU usage by container metrics from cadvisor are lower than should be.
