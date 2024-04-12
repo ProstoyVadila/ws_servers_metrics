@@ -27,7 +27,9 @@ It's not a comparison of languages or frameworks. The main idea was to take real
 
 ## Dashboard
 
-**grafana** - http://localhost:3000 \
+You can check metrics here after setting up docker containers
+
+**grafana** - http://localhost:3000
 
 ### **My custom dashboard** - [here](http://localhost:3000/d/ee75b6b8-f1c6-4ef1-9d39-fe50cc55a274/websocket-server3a-rust-vs-python?orgId=1&refresh=5s)
 
@@ -45,7 +47,7 @@ brew install k6
 
 More about [k6 installation](https://k6.io/docs/get-started/installation/)
 
-2. **raise containers**
+2. **Set up containers**
 
 ```
 docker compose up -d
@@ -61,7 +63,7 @@ k6 run -o experimental-prometheus-rw k6/scripts/both.js
 ### Container Load
 
 1. **Uncomment k6 container manifest in compose.yaml**
-2. **raise all containers**
+2. **set up all containers**
 
 ```
 docker compose up -d
