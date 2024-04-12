@@ -20,7 +20,7 @@ FROM alpine:3.19
 # ENV ROCKET_PORT=8080
 
 # if needed, install additional dependencies here
-RUN apk add --no-cache libgcc
+RUN apk add --no-cache libgcc curl
 # copy the binary into the final image
 # COPY --from=builder /app/Rocket.toml .
 COPY --from=builder /app/target/release/rust_ws_app .

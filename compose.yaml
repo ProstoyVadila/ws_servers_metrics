@@ -32,7 +32,11 @@ services:
       GF_PATHS_PROVISIONING: /etc/grafana/provisioning
       DS_PROMETHEUS: prometheus
     depends_on:
-      - prom
+      rust_ws_app:
+        condition: service_healthy
+      python_ws_app:
+        condition: service_healthy
+      
 
   rust_ws_app:
     build:
@@ -47,6 +51,11 @@ services:
         limits:
           cpus: 2
           memory: 2g
+    healthcheck:
+      test: curl -f http://0.0.0.0:8000/healthcheck
+      interval: 2s
+      timeout: 3s
+      retries: 7
 
   python_ws_app:
     build:
@@ -63,15 +72,19 @@ services:
         limits:
           cpus: 2
           memory: 2g
+    healthcheck:
+      test: curl -f http://0.0.0.0:8001/healthcheck
+      interval: 2s
+      timeout: 3s
+      retries: 7
 
   # k6:
   #   image: grafana/k6
   #   volumes:
-  #     - ./k6/scripts/python_script.js:/python_script.js
-  #   command: run /python_script.js
+  #     - ./k6/scripts/both.js:/script.js
+  #   command: run -e RUST_APP_URL=http://rust_ws_app:8000 -e PYTHON_APP_URL=http://python_ws_app:8001 /script.js
   #   depends_on:
-  #     - prom 
-  #     - grafana
-  #     - cadvisor 
-  #     - python_ws_app 
-  #     - rust_ws_app 
+  #     rust_ws_app:
+  #       condition: service_healthy
+  #     python_ws_app:
+  #       condition: service_healthy

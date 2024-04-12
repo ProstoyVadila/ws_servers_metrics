@@ -2,8 +2,8 @@ import ws from "k6/ws";
 import { sleep, check } from "k6";
 
 const SLEEP_TIME = 0.4;
-const RUST_APP_URL = "ws://localhost:8000/ws";
-const PYTHON_APP_URL = "ws://localhost:8001/ws";
+const RUST_APP_URL = `${__ENV.RUST_APP_URL}` || "ws://localhost:8000/ws";
+const PYTHON_APP_URL = `${__ENV.PYTHON_APP_URL}` || "ws://localhost:8001/ws";
 
 const randomIntBetween = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min);

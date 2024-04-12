@@ -21,6 +21,7 @@ FROM python:3.11-slim as main-stage
 WORKDIR /app
 # Install any needed packages specified in requirements.txt
 COPY --from=poetry-stage /poetry_deps/requirements.txt /app
+RUN apt-get update && apt-get install -y curl
 RUN pip install --prefer-binary -r /app/requirements.txt
 
 # Copy the current directory contents into the container at /app
