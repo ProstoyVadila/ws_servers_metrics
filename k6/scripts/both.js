@@ -2,19 +2,25 @@ import ws from "k6/ws";
 import { sleep, check } from "k6";
 
 const SLEEP_TIME = 0.4;
-const RUST_APP_URL = `${__ENV.RUST_APP_URL}` || "ws://localhost:8000/ws";
-const PYTHON_APP_URL = `${__ENV.PYTHON_APP_URL}` || "ws://localhost:8001/ws";
+const RUST_APP_URL = __ENV.RUST_APP_URL_APP_URL
+  ? `${__ENV.RUST_APP_URL}`
+  : "ws://localhost:8000/ws";
+const PYTHON_APP_URL = __ENV.PYTHON_APP_URL
+  ? `${__ENV.PYTHON_APP_URL}`
+  : "ws://localhost:8001/ws";
 
 const randomIntBetween = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
 const getRandomAppURL = () => {
   const oneOrZero = Math.random() >= 0.5 ? 1 : 0;
+  const url = oneOrZero === 1 ? RUST_APP_URL : PYTHON_APP_URL;
   console.debug(
-    oneOrZero === 1 ? "connect to rust app" : "connect to python app"
+    oneOrZero === 1
+      ? `connect to rust app: ${url}`
+      : `connect to python app: ${url}`
   );
 
-  const url = oneOrZero === 1 ? RUST_APP_URL : PYTHON_APP_URL;
   return url;
 };
 //
@@ -28,12 +34,13 @@ export const options = {
       vus: 80,
       startTime: "0",
       duration: "45s",
+      tags: { test_type: "3_direct_messages" },
     },
     rampUp50With100Messages: {
       executor: "ramping-vus",
       exec: "rampUp50With100Messages",
       startVUs: 5,
-      startTime: "1ms",
+      startTime: "2ms",
       tags: { test_type: "100_messages" },
       stages: [
         { target: 20, duration: "30s" },
@@ -42,15 +49,14 @@ export const options = {
         { target: 80, duration: "30s" },
         { target: 100, duration: "30s" },
         { target: 150, duration: "30s" },
-        { target: 200, duration: "30s" },
-        { target: 250, duration: "30s" }, // 4m
+        { target: 200, duration: "30s" }, // 3m30s
       ],
     },
     rampUp50WithSingleMessage: {
       executor: "ramping-vus",
       exec: "rampUp50WithSingleMessage",
       startVUs: 5,
-      startTime: "4m20s",
+      startTime: "6m",
       tags: { test_type: "signle_message" },
       stages: [
         { target: 20, duration: "30s" },
