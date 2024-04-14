@@ -17,7 +17,7 @@ pub static ALL_WS_CONNECTIONS_TOTAL: Lazy<IntCounter> = Lazy::new(|| {
 });
 pub static WS_CONN_CLOSED_ERRORS_TOTAL: Lazy<IntCounter> = Lazy::new(|| {
     IntCounter::new("ws_conn_closed_erros_total", "an amount of closed websocket connections")
-        .expect("Cannot create ws_conn_closed_erros_total")
+        .expect("Cannot create ws_conn_closed_errors_total")
 });
 
 pub static BUCKETS: [f64; 14] = [0.0001, 0.0005, 0.0025, 0.005, 0.0075, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 5.0];
