@@ -2,29 +2,9 @@ import ws from "k6/ws";
 import { sleep, check } from "k6";
 
 const SLEEP_TIME = 0.4;
-const RUST_APP_URL = __ENV.RUST_APP_URL
-  ? `${__ENV.RUST_APP_URL}`
-  : "ws://localhost:8000/ws";
-const PYTHON_APP_URL = __ENV.PYTHON_APP_URL
-  ? `${__ENV.PYTHON_APP_URL}`
-  : "ws://localhost:8001/ws";
-
-const randomIntBetween = (min, max) => {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-};
-const getRandomAppURL = () => {
-  const oneOrZero = Math.random() >= 0.5 ? 1 : 0;
-  const url = oneOrZero === 1 ? RUST_APP_URL : PYTHON_APP_URL;
-  console.debug(
-    oneOrZero === 1
-      ? `connect to rust app: ${url}`
-      : `connect to python app: ${url}`
-  );
-
-  return url;
-};
-//
-// const sessionDuration = randomIntBetween(10000, 60000); // 10s ~ 60s
+const GO_APP_URL = __ENV.GO_APP_URL
+  ? `${__ENV.GO_APP_URL}`
+  : "ws://localhost:8000/";
 
 export const options = {
   scenarios: {
@@ -89,9 +69,9 @@ export function rampUp50WithSingleMessage() {
     body: `${Date.now()}`,
   };
 
-  const url = getRandomAppURL();
+  // const url = getRandomAppURL();
 
-  const app = ws.connect(url, (socket) => {
+  const app = ws.connect(GO_APP_URL, (socket) => {
     socket.on("open", function open() {
       console.debug(`VU ${__VU}: connected`);
 
