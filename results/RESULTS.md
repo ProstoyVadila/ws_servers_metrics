@@ -63,7 +63,7 @@ python_ws_app is on :8001 port
 
 ## Errors peak in Python App
 
-The first peak started with **~240** users per service on **100 broadcast messages per user**.
+The first peak started with **~120** users per service on **100 broadcast messages per user**.
 
 The second peak started with **~300** users per service on **single broadcast message**
 
