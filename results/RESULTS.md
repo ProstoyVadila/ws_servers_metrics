@@ -65,3 +65,5 @@ The first peak started with **~240** users per service on **100 broadcast messag
 The second peak started with **~300** users per service on **single broadcast message**
 
 ![python peak](/results/screenshot_peak.png)
+
+![python peak2](/results/screenshot_peak2.png)
