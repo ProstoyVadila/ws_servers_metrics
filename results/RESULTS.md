@@ -13,7 +13,7 @@ Virtual users: 80
 
 Each user connects, sends, recieves and sends again.
 
-### 2. 100 broadcast Message (rampUp50With100Messages)
+### 2. 100 broadcast Messages (rampUp50With100Messages)
 
 Virtual users: 3-200
 
