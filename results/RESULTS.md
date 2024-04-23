@@ -47,6 +47,9 @@ rampUp50With100Messages   ✓ [======================================] 124/200 V
 rampUp50WithSingleMessage ✓ [======================================] 000/750 VUs  9m0s
 ```
 
+rust_ws_app is on :8000 port \
+python_ws_app is on :8001 port
+
 ![k6 results](/results/screenshot_results_k6.png)
 
 ## Services results
