@@ -65,8 +65,8 @@ python_ws_app is on :8001 port
 
 The first peak started with **~120** users per service on **100 broadcast messages per user**.
 
-The second peak started with **~300** users per service on **single broadcast message**
-
 ![python peak](/results/screenshot_peak.png)
+
+The second peak started with **~300** users per service on **single broadcast message**
 
 ![python peak2](/results/screenshot_peak2.png)
