@@ -11,19 +11,19 @@ python_app: **2Gb 2cpu**
 
 Virtual users: 80
 
-Each user connect, send, recieve and send again.
+Each user connects, sends, recieves and sends again.
 
 ### 2. 100 broadcast Message (rampUp50With100Messages)
 
 Virtual users: 3-200
 
-Each user produce 100 messages for broadcast
+Each user produces 100 messages for broadcast
 
 ### 3. Single Message (rampUp50WithSingleMessage)
 
 Virtual users: 3-750
 
-Each user produce 1 message for broadcast
+Each user produces 1 message for broadcast
 
 ## K6 results
 
