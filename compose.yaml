@@ -53,7 +53,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 2
+          cpus: "2"
           memory: 2g
     healthcheck:
       test: curl -f http://0.0.0.0:8000/healthcheck
@@ -74,7 +74,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 2
+          cpus: "2"
           memory: 2g
     healthcheck:
       test: curl -f http://0.0.0.0:8001/healthcheck

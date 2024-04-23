@@ -1,24 +1,42 @@
 package models
 
-// MessageParams represents generic message parameters.
-// In real-world application it is better to avoid such types for better
-// performance.
-type MessageParams map[string]interface{}
+import (
+	"bytes"
+	"fmt"
+)
+
+type ActionType string
+
+const (
+	DIRECT    ActionType = "direct"
+	BROADCAST ActionType = "broadcast"
+	PING      ActionType = "ping"
+	PONG      ActionType = "pong"
+)
 
 type WsMessage struct {
-	Params     MessageParams `json:"params"`
-	ActionType string        `json:"method"`
-	Data       string        `json:"data"`
-	Body       string        `json:"body"`
-	UserId     int           `json:"id"`
+	ActionType ActionType `json:"action_type"`
+	Body       string     `json:"body"`
+	Data       string     `json:"data,omitempty"`
+	UserId     string     `json:"user_id,omitempty"`
 }
 
-type WsResponse struct {
-	UserId int           `json:"id"`
-	Result MessageParams `json:"result"`
+func NewMessage(actionType ActionType, userId, body, data string) WsMessage {
+	return WsMessage{
+		ActionType: actionType,
+		UserId:     userId,
+		Body:       body,
+		Data:       data,
+	}
 }
 
-type WsError struct {
-	UserId int           `json:"id"`
-	Error  MessageParams `json:"error"`
+func (w *WsMessage) Show() string {
+	var buf bytes.Buffer
+
+	buf.WriteString(fmt.Sprintf("{ActionType: %s, ", w.ActionType))
+	buf.WriteString(fmt.Sprintf("UserId: %s, ", w.UserId))
+	buf.WriteString(fmt.Sprintf("Body: %s, ", w.Body))
+	buf.WriteString(fmt.Sprintf("Data: %s}\n", w.Data))
+
+	return buf.String()
 }

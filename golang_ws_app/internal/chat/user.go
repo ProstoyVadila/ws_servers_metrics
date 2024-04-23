@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"strings"
+	"strconv"
 	"sync"
 
 	"github.com/ProstoyVadila/golang_ws_app/internal/models"
@@ -42,56 +42,63 @@ func (u *User) Receive() error {
 		// Handled some control message.
 		return nil
 	}
+	log.Printf("Got new message %v", req.Show())
 
-	actionType := strings.ToLower(req.ActionType)
-	switch actionType {
-	case "broadcast":
-		// do broadcast
-		// u.chat.Broadcast()
-	case "direct":
-		// do direct
-		// u.writeResultTo()
-	case "publish":
-		req.Params["author"] = u.name
-		req.Params["time"] = timestamp()
-		u.chat.Broadcast("publish", req.Params)
+	if req.UserId == "" {
+		req.UserId = "new user id"
+	}
+	if req.Data == "" {
+		req.Data = strconv.Itoa(int(timestamp()))
+	}
+
+	switch req.ActionType {
+	case models.BROADCAST:
+		u.chat.Broadcast(req)
+	case models.DIRECT:
+		u.WriteDirect(req)
+	case models.PING:
+		//
+	case models.PONG:
+		//
 	default:
-		return u.writeErrorTo(req, models.MessageParams{
-			"error": "not implemented",
-		})
+		u.WriteDirect(req)
 	}
 	return nil
 }
 
-func (u *User) writeErrorTo(req *models.WsMessage, err models.MessageParams) error {
-	return u.write(models.WsError{
-		UserId: req.UserId,
-		Error:  err,
-	})
-}
+// func (u *User) writeErrorTo(req *models.WsMessage, err models.MessageParams) error {
+// 	return u.write(models.WsError{
+// 		UserId: req.UserId,
+// 		Error:  err,
+// 	})
+// }
 
-func (u *User) writeResultTo(req *models.WsMessage, result models.MessageParams) error {
-	return u.write(models.WsResponse{
-		UserId: req.UserId,
-		Result: result,
-	})
-}
+//	func (u *User) writeNotice(method string, params models.MessageParams) error {
+//		return u.write(models.WsMessage{
+//			ActionType: method,
+//			Params:     params,
+//		})
+//	}
 
-func (u *User) writeNotice(method string, params models.MessageParams) error {
-	return u.write(models.WsMessage{
-		ActionType: method,
-		Params:     params,
-	})
+func (u *User) WriteDirect(req *models.WsMessage) {
+	log.Println("writing direct message")
+	if err := u.write(*req); err != nil {
+		log.Printf("cannot write direct message: %v\n", err)
+	}
 }
 
 func (u *User) write(data interface{}) error {
-	writer := wsutil.NewWriter(u.conn, ws.StateServerSide, ws.OpText)
-	encoder := json.NewEncoder(writer)
+	w := wsutil.NewWriter(u.conn, ws.StateServerSide, ws.OpText)
+	encoder := json.NewEncoder(w)
 
 	u.mutex.Lock()
 	defer u.mutex.Unlock()
 
 	if err := encoder.Encode(data); err != nil {
+		return err
+	}
+
+	if err := w.Flush(); err != nil {
 		return err
 	}
 	return nil

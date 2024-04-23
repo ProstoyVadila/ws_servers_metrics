@@ -1,7 +1,7 @@
 import ws from "k6/ws";
 import { sleep, check } from "k6";
 
-const SLEEP_TIME = 0.4;
+const SLEEP_TIME = 0.7;
 const RUST_APP_URL = __ENV.RUST_APP_URL
   ? `${__ENV.RUST_APP_URL}`
   : "ws://localhost:8000/ws";
@@ -28,9 +28,9 @@ const getRandomAppURL = () => {
 
 export const options = {
   scenarios: {
-    constVUWith100Messages: {
+    constVUWith3DirectMessages: {
       executor: "constant-vus",
-      exec: "constVUWithDirectMessages",
+      exec: "constVUWith3DirectMessages",
       vus: 80,
       startTime: "0",
       duration: "45s",
@@ -40,7 +40,7 @@ export const options = {
       executor: "ramping-vus",
       exec: "rampUp50With100Messages",
       startVUs: 5,
-      startTime: "2ms",
+      startTime: "2m",
       tags: { test_type: "100_messages" },
       stages: [
         { target: 20, duration: "30s" },
@@ -56,7 +56,7 @@ export const options = {
       executor: "ramping-vus",
       exec: "rampUp50WithSingleMessage",
       startVUs: 5,
-      startTime: "6m",
+      startTime: "5m",
       tags: { test_type: "signle_message" },
       stages: [
         { target: 20, duration: "30s" },
@@ -79,15 +79,26 @@ export const options = {
         { target: 750, duration: "30s" }, // 9m30s
       ],
     },
+    // constVUsSleepTimeDecrease: {
+    //   executor: "",
+    //   exec: "",
+    //   vus: 80,
+    //   duration: "2m",
+    //   tags: {}
+    // }
   },
+};
+
+const get_data = (action_type) => {
+  return {
+    action_type: action_type,
+    body: `${Date.now()}`,
+  };
 };
 
 export function rampUp50WithSingleMessage() {
   sleep(SLEEP_TIME);
-  const data = {
-    action_type: "broadcast",
-    body: `${Date.now()}`,
-  };
+  const data = get_data("broadcast");
 
   const url = getRandomAppURL();
 
@@ -114,16 +125,13 @@ export function rampUp50WithSingleMessage() {
   });
 
   check(app, {
-    "Connected successfully": (r) => r && r.status === 101,
+    "Upgraded successfully": (r) => r && r.status === 101,
   });
 }
 
 export function rampUp50With100Messages() {
   sleep(SLEEP_TIME);
-  const data = {
-    action_type: "broadcast",
-    body: `${Date.now()}`,
-  };
+  const data = get_data("broadcast");
 
   const url = getRandomAppURL();
 
@@ -156,16 +164,13 @@ export function rampUp50With100Messages() {
   });
 
   check(app, {
-    "Connected successfully": (r) => r && r.status === 101,
+    "Upgraded successfully": (r) => r && r.status === 101,
   });
 }
 
-export function constVUWithDirectMessages() {
+export function constVUWith3DirectMessages() {
   sleep(SLEEP_TIME);
-  const data = {
-    action_type: "direct",
-    body: `${Date.now()}`,
-  };
+  const data = get_data("direct");
 
   const url = getRandomAppURL();
 
@@ -182,6 +187,7 @@ export function constVUWithDirectMessages() {
         sleep(SLEEP_TIME);
         if (flag) {
           socket.send(JSON.stringify(data));
+          flag = !flag;
         } else {
           socket.close();
         }
@@ -199,6 +205,6 @@ export function constVUWithDirectMessages() {
   });
 
   check(app, {
-    "Connected successfully": (r) => r && r.status === 101,
+    "Upgraded successfully": (r) => r && r.status === 101,
   });
 }

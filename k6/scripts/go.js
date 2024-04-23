@@ -105,9 +105,7 @@ export function rampUp50With100Messages() {
     body: `${Date.now()}`,
   };
 
-  const url = getRandomAppURL();
-
-  const app = ws.connect(url, (socket) => {
+  const app = ws.connect(GO_APP_URL, (socket) => {
     socket.on("open", function open() {
       console.debug(`VU ${__VU}: connected`);
 
@@ -147,9 +145,7 @@ export function constVUWithDirectMessages() {
     body: `${Date.now()}`,
   };
 
-  const url = getRandomAppURL();
-
-  const app = ws.connect(url, (socket) => {
+  const app = ws.connect(GO_APP_URL, (socket) => {
     socket.on("open", function open() {
       console.debug(`VU ${__VU}: connected`);
 

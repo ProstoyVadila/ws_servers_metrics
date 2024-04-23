@@ -16,7 +16,7 @@ pub static ALL_WS_CONNECTIONS_TOTAL: Lazy<IntCounter> = Lazy::new(|| {
         .expect("Cannot create new_connections_total metric")
 });
 pub static WS_CONN_CLOSED_ERRORS_TOTAL: Lazy<IntCounter> = Lazy::new(|| {
-    IntCounter::new("ws_conn_closed_erros_total", "an amount of closed websocket connections")
+    IntCounter::new("ws_conn_closed_errors_total", "an amount of closed websocket connections")
         .expect("Cannot create ws_conn_closed_errors_total")
 });
 
@@ -48,7 +48,7 @@ pub fn get_prometheus() -> PrometheusMetrics {
     prom.registry().register(Box::new(ALL_WS_CONNECTIONS_TOTAL.clone()))
         .expect("Cannot register ws_connections_total metric");
     prom.registry().register(Box::new(WS_CONN_CLOSED_ERRORS_TOTAL.clone()))
-        .expect("Cannot register ws_conn_closed_erros_total");
+        .expect("Cannot register ws_conn_closed_errors_total");
     prom.registry().register(Box::new(WS_BROADCAST_DURATION_SECONDS.clone()))
         .expect("Cannot register ws_broadcast_duration_seconds");
     prom.registry().register(Box::new(WS_MESSAGE_HANDLING_DURATION_SECONDS.clone()))
