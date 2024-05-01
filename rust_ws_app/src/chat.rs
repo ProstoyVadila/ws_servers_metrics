@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use rocket::{
     futures::{stream::SplitSink, SinkExt},
-    tokio::sync::RwLock,
+    tokio::sync::Mutex,
 };
 use rocket_ws::{stream::DuplexStream, Message};
 
@@ -22,12 +22,12 @@ impl ChatRoomConnection {
 
 #[derive(Default)]
 pub struct ChatRoom {
-    pub connections: RwLock<HashMap<usize, ChatRoomConnection>>,
+    pub connections: Mutex<HashMap<usize, ChatRoomConnection>>,
 }
 
 impl ChatRoom {
     pub async fn add(&self, user_id: usize, ws_sink: SplitSink<DuplexStream, Message>) {
-        let mut conns = self.connections.write().await;
+        let mut conns = self.connections.lock().await;
         let connection = ChatRoomConnection::new(user_id, ws_sink);
         conns.insert(user_id, connection);
     }
@@ -68,7 +68,7 @@ impl ChatRoom {
     }
 
     pub async fn send_direct_message(&self, user_id: usize, msg: WsMessage) {
-        let mut conns = self.connections.write().await;
+        let mut conns = self.connections.lock().await;
         let conn = match conns.get_mut(&user_id) {
             Some(conn) => conn,
             None => {
@@ -92,7 +92,7 @@ impl ChatRoom {
 
     pub async fn broadcast_message(&self, msg: WsMessage) {
         let timer = WS_BROADCAST_DURATION_SECONDS.start_timer();
-        let mut conns = self.connections.write().await;
+        let mut conns = self.connections.lock().await;
         for (_id, conn) in conns.iter_mut() {
             let _ = conn.sink.send(Message::Text(msg.to_string())).await;
         }
@@ -101,7 +101,7 @@ impl ChatRoom {
 
     pub async fn flush(&self, user_id: usize) {
         log::debug!("removing user {}", user_id);
-        let mut conns = self.connections.write().await;
+        let mut conns = self.connections.lock().await;
         let _ = match conns.remove(&user_id) {
             Some(conn) => conn,
             _ => {
