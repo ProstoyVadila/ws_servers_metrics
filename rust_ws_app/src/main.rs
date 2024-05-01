@@ -1,12 +1,8 @@
-use rocket;
-use env_logger;
-
-mod models;
-mod handlers;
-mod routes;
 mod chat;
+mod handlers;
 mod metrics;
-
+mod models;
+mod routes;
 
 #[rocket::main]
 async fn main() {

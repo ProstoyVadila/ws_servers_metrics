@@ -1,18 +1,13 @@
-
 use std::collections::HashMap;
 
 use rocket::{
-    futures::{stream::SplitSink, SinkExt}, tokio::sync::Mutex,
+    futures::{stream::SplitSink, SinkExt},
+    tokio::sync::RwLock,
 };
-use rocket_ws::{Message, stream::DuplexStream};
-use log;
+use rocket_ws::{stream::DuplexStream, Message};
 
-use crate::models::{WsMessage, ActionType};
-use crate::metrics::{
-    WS_BROADCAST_DURATION_SECONDS,
-    WS_CONN_CLOSED_ERRORS_TOTAL,
-};
-
+use crate::metrics::{WS_BROADCAST_DURATION_SECONDS, WS_CONN_CLOSED_ERRORS_TOTAL};
+use crate::models::{ActionType, WsMessage};
 
 pub struct ChatRoomConnection {
     pub user_id: usize,
@@ -21,22 +16,19 @@ pub struct ChatRoomConnection {
 
 impl ChatRoomConnection {
     fn new(user_id: usize, sink: SplitSink<DuplexStream, Message>) -> ChatRoomConnection {
-        ChatRoomConnection {
-            user_id,
-            sink,
-        }
+        ChatRoomConnection { user_id, sink }
     }
 }
 
 #[derive(Default)]
 pub struct ChatRoom {
-    pub connections: Mutex<HashMap<usize, ChatRoomConnection>>,
+    pub connections: RwLock<HashMap<usize, ChatRoomConnection>>,
 }
 
 impl ChatRoom {
     pub async fn add(&self, user_id: usize, ws_sink: SplitSink<DuplexStream, Message>) {
-        let mut conns = self.connections.lock().await;
-        let connection = ChatRoomConnection::new(user_id.clone(), ws_sink);
+        let mut conns = self.connections.write().await;
+        let connection = ChatRoomConnection::new(user_id, ws_sink);
         conns.insert(user_id, connection);
     }
 
@@ -58,7 +50,7 @@ impl ChatRoom {
                 ActionType::Broadcast => self.handle_broadcast(user_id, msg).await,
                 ActionType::Ping => {
                     todo!()
-                },
+                }
                 ActionType::Pong => {
                     todo!()
                 }
@@ -69,14 +61,14 @@ impl ChatRoom {
     pub async fn handle_direct(&self, user_id: usize, msg: WsMessage) {
         // get timestamp for latency
         let now = chrono::Utc::now();
-        let data = now.timestamp_nanos_opt().and_then(|now| Some(now.to_string()));
+        let data = now.timestamp_nanos_opt().map(|now| now.to_string());
         let msg = WsMessage::new(user_id, ActionType::Direct, msg.body, data);
 
         self.send_direct_message(user_id, msg).await;
     }
 
     pub async fn send_direct_message(&self, user_id: usize, msg: WsMessage) {
-        let mut conns = self.connections.lock().await;
+        let mut conns = self.connections.write().await;
         let conn = match conns.get_mut(&user_id) {
             Some(conn) => conn,
             None => {
@@ -100,7 +92,7 @@ impl ChatRoom {
 
     pub async fn broadcast_message(&self, msg: WsMessage) {
         let timer = WS_BROADCAST_DURATION_SECONDS.start_timer();
-        let mut conns = self.connections.lock().await;
+        let mut conns = self.connections.write().await;
         for (_id, conn) in conns.iter_mut() {
             let _ = conn.sink.send(Message::Text(msg.to_string())).await;
         }
@@ -109,7 +101,7 @@ impl ChatRoom {
 
     pub async fn flush(&self, user_id: usize) {
         log::debug!("removing user {}", user_id);
-        let mut conns = self.connections.lock().await;
+        let mut conns = self.connections.write().await;
         let _ = match conns.remove(&user_id) {
             Some(conn) => conn,
             _ => {
@@ -119,5 +111,4 @@ impl ChatRoom {
             }
         };
     }
-
 }

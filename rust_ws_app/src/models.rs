@@ -1,19 +1,17 @@
 use serde::{self, Deserialize, Serialize};
 use serde_json::json;
 
-
 #[derive(PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum ActionType {
-    #[serde(alias="direct", alias="DIRECT")]
+    #[serde(alias = "direct", alias = "DIRECT")]
     Direct,
-    #[serde(alias="broadcast", alias="BROADCAST")]
+    #[serde(alias = "broadcast", alias = "BROADCAST")]
     Broadcast,
-    #[serde(alias="ping", alias="ping")]
+    #[serde(alias = "ping", alias = "ping")]
     Ping,
-    #[serde(alias="pong", alias="pong")]
+    #[serde(alias = "pong", alias = "pong")]
     Pong,
 }
-
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct WsMessage {
@@ -25,15 +23,15 @@ pub struct WsMessage {
 
 impl WsMessage {
     pub fn new(
-        user_id: usize, 
-        action_type: ActionType, 
-        body: String, 
-        data: Option<String>
+        user_id: usize,
+        action_type: ActionType,
+        body: String,
+        data: Option<String>,
     ) -> WsMessage {
         WsMessage {
-            user_id: Some(user_id), 
+            user_id: Some(user_id),
             action_type,
-            body, 
+            body,
             data,
         }
     }
